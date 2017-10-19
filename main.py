@@ -2,22 +2,41 @@ from ImageFeatureExtractor import ImageFeatureExtractor
 import time
 import numpy as np
 import cv2
+import argparse
 
-ENTRY = "LRoot_clean.npz" 
-OUT = "LRoot_clean_extracted.npz"
+# parse command line args
+parser = argparse.ArgumentParser(description="Extract features from a set of images")
+parser.add_argument('input',  metavar='in', type=str, nargs=1,
+                    help="input grayscale numpy images")
+parser.add_argument('output', metavar='out', type=str, nargs=1,
+                    help="output features")
+parser.add_argument('method', metavar='method', type=str, nargs=1,
+                    help="segmentation method")
 
-data = np.load(ENTRY)
+args = parser.parse_args()
+incoming = args.input[0]
+output = args.output[0]
+method = args.method[0]
+
+print(incoming)
+
+# opens data and gets to business
+data = np.load(incoming)
 X = data['arr_0']
 y = data['arr_1']
 
-extractor = ImageFeatureExtractor('otsu')
+extractor = ImageFeatureExtractor(method)
 before = time.clock()
-print("Begin!")
+total = 0
 for i in range(len(X)):
-    X[i] = extractor.extract(X[i])
-    if i % 100 == 0:
-        now = time.clock()
-        print("{} - {}s".format(i, now - before))
-        before = now
+    try:
+        X[i] = extractor.extract(X[i])
+    except:
+        print("UNTREATED ERROR AT IMAGE {}".format(i))
+        raise
+now = time.clock()
+after = now - before
 
-np.savez(OUT, arr_0=X, arr_1 = y)
+print("Done after {}s".format(after))
+print("Write output")
+np.savez(output, arr_0=X, arr_1 = y)
