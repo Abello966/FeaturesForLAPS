@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from skimage.filters import threshold_yen
 
 """
 Class concentrating segmentation logic
@@ -32,25 +33,12 @@ class ImageSegmenter:
 
     """
     Based off Scikit-image's implementation
-    Available at:
-    https://github.com/scikit-image/scikit-image/blob/master/skimage/filters/thresholding.py
     """
     def yenSegmentation(image):
-        # simulate skimage histogram
-        hist, bin_centers = np.histogram(image.ravel(), 256)
-        bin_centers = np.arange(256)
+        binimage = image < threshold_yen(image)
+        binimage = binimage.astype("uint8") * 255
+        return binimage
 
-        # probability mass function
-        pmf = hist.astype(np.float32) / hist.sum()
-        P1 = np.cumsum(pmf)
-        P1_sq = np.cumsum(pmf ** 2)
-        P2_sq = np.cumsum(pmf[::-1] ** 2)[::-1]
-        crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) *
-                      (P1[:-1] * (1.0 - P1[:-1])) ** 2)
-
-        thresh = bin_centers[crit.argmax()]
-
-        return cv2.threshold(image, thresh, 255, cv2.THRESH_BINARY_INV)[1]
 
     """
     Watershed with markers
