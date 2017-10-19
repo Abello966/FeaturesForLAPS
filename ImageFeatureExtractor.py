@@ -50,7 +50,7 @@ class ImageFeatureExtractor:
                     res.append(np.zeros(ImageFeatureExtractor.numfeats))
                 except Exception as e:
                     print("UNTREATED ERROR AT INDEX {}".format(i))
-                    print(type(e) + ": " + str(e))
+                    print(str(type(e)) + ": " + str(e))
                     res.append(np.zeros(ImageFeatureExtractor.numfeats))
                 else: 
                     res.append(self.calculate(option))

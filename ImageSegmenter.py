@@ -35,10 +35,14 @@ class ImageSegmenter:
     Based off Scikit-image's implementation
     """
     def yenSegmentation(image):
-        binimage = image < threshold_yen(image)
+        thresh = threshold_yen(image)
+        if np.sum(image < thresh) > np.prod(image.shape) * 0.75:
+            binimage = image > thresh
+        else:
+            binimage = image < thresh
+
         binimage = binimage.astype("uint8") * 255
         return binimage
-
 
     """
     Watershed with markers
