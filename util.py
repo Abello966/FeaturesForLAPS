@@ -16,6 +16,7 @@ def getMainContour(segimage, contours, hierarchy):
     """
     get main contour, the one that maximizes this metric
     """
+    idxMainParticle = 0
     th = 0
     for i in range(len(contours)):
         if (hierarchy[0][i][3] == -1):

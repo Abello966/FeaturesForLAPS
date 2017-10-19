@@ -4,12 +4,25 @@ from util import *
 from ImageSegmenter import ImageSegmenter
 
 """
+Error when segmentation returns an all black image
+"""
+class SegmentationError(RuntimeError):
+    def __init__(self, method):
+        mes = method + " segmentation returned all black image"
+        super(SegmentationError, self).__init__(mes)
+
+
+"""
 Class concentrating feature extraction logic
 """
 
 class ImageFeatureExtractor:
 
+    # Hardcoded number of features available
+    numfeats = 54
+    
     def __init__(self, segmethod):
+        self.segmethod = segmethod
         self.segmenter = ImageSegmenter(segmethod)
         self.feats = {}
 
@@ -24,11 +37,18 @@ class ImageFeatureExtractor:
         if image.ndim == 2:
             self.prepare(image)
             return self.calculate(option)
+
         elif image.ndim == 3:
             res = list()
-            for inst in image:
-                self.prepare(inst)
-                res.append(self.calculate(option))
+            for i in range(len(image)):
+                inst = image[i]
+                try:
+                    self.prepare(inst)
+                except SegmentationError as e:
+                    print("index {} filled with 0: ".format(i) + e)
+                    res.append(np.zeros(ImageFeatureExtractor.numfeats))
+                else: 
+                    res.append(self.calculate(option))
             return res
         else:
             raise TypeError("ImageFeatureExtractor: unexpected ndim")
@@ -42,6 +62,8 @@ class ImageFeatureExtractor:
         segment image
         """
         self.segimage = self.segmenter.segment(image)
+        if (np.sum(self.segimage != 0) == 0):
+            raise SegmentationError(self.segmethod)
 
         """
         extract contours and relevant info from binary image
