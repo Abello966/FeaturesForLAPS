@@ -38,14 +38,19 @@ class ImageFeatureExtractor:
             self.prepare(image)
             return self.calculate(option)
 
-        elif image.ndim == 3:
+        # interpret as list
+        elif image.ndim == 1:
             res = list()
             for i in range(len(image)):
                 inst = image[i]
                 try:
                     self.prepare(inst)
                 except SegmentationError as e:
-                    print("index {} filled with 0: ".format(i) + e)
+                    print("index {} filled with 0s: ".format(i) + str(e))
+                    res.append(np.zeros(ImageFeatureExtractor.numfeats))
+                except Exception as e:
+                    print("UNTREATED ERROR AT INDEX {}".format(i))
+                    print(type(e) + ": " + str(e))
                     res.append(np.zeros(ImageFeatureExtractor.numfeats))
                 else: 
                     res.append(self.calculate(option))

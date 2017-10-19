@@ -28,12 +28,7 @@ y = data['arr_1']
 extractor = ImageFeatureExtractor(method)
 before = time.clock()
 total = 0
-for i in range(len(X)):
-    try:
-        X[i] = extractor.extract(X[i])
-    except:
-        print("UNTREATED ERROR AT IMAGE {}".format(i))
-        raise
+X = extractor.extract(X)
 now = time.clock()
 after = now - before
 
